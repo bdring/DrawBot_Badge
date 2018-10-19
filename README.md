@@ -1,6 +1,8 @@
 # The DrawBot Badge
 
-![Drawbot Badge](http://www.buildlog.net/blog/wp-content/uploads/2018/10/DrawBot_01.jpg)
+
+
+<img src="http://www.buildlog.net/blog/wp-content/uploads/2018/10/DrawBot_01.jpg" width="500">
 
 ### Overview
 
