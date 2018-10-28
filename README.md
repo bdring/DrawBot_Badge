@@ -33,6 +33,10 @@ During the second part of the workshop everyone builds the drawing badge.
 
 **Note:** Some of the above features cannot be used at the same time. For example: For each of the 3 axes (XYZ) you must choose to use either a stepper motor or hobby servo. You cannot use all 6 items at once.  There are more details in the wiki.
 
+### Assembly instructions
+
+[See the wiki](https://github.com/bdring/DrawBot_Badge/wiki/Assembly-Instructions)
+
 ### Status
 
 All source code and files will be added to the repo soon.
