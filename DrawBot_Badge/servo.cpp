@@ -45,7 +45,7 @@ void servo_init()
 	
 	grbl_send(CLIENT_SERIAL, "[MSG:Badge Mode]\r\n");
 	
-	// debug stuff
+	/* debug stuff
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo time per bit: %1.10f]\r\n", SERVO_TIME_PER_BIT);
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo min pulse ms: %1.10f]\r\n", SERVO_MIN_PULSE_MS);
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo max pulse ms: %1.10f]\r\n", SERVO_MAX_PULSE_MS);
@@ -59,7 +59,9 @@ void servo_init()
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo B zero ang: %1.10f]\r\n", SERVO_B_ZERO_ANG);
 	
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo A zero: %d]\r\n", SERVO_A_ZERO_PT);
-	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo B zero: %d]\r\n", SERVO_B_ZERO_PT);
+	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo B zero: %d]\r\n", SERVO_B_ZERO_PT);	
+	*/
+	
 	
 	//Servo A ledcSetup
 	ledcSetup(SERVO_A_CHANNEL_NUM, SERVO_PULSE_FREQ, SERVO_PULSE_RES_BITS);
