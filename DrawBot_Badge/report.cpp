@@ -528,6 +528,19 @@ void report_build_info(char *line, uint8_t client)
   #if defined (ENABLE_WIFI)
   grbl_send(client, (char *)wifi_config.info()); 
   #endif
+	
+	#ifdef ENABLE_BLUETOOTH
+		char bt_info[LINE_BUFFER_SIZE];
+		settings_read_build_info(bt_info);
+		if (bt_info[0] == 0) {
+			grbl_send(client, "[MSG:Bluetooth:(Needs Name)");
+		}
+		else {			
+			grbl_sendf(client, "[MSG:Bluetooth:%s]\r\n",  bt_info);
+		}
+		
+	#endif
+	
 }
 
 

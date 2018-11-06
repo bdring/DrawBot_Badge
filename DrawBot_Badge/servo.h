@@ -18,8 +18,8 @@
   You should have received a copy of the GNU General Public License
   along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef servo_h
-#define servo_h  
+
+
 
 /*
 Tower pro specs
@@ -42,9 +42,17 @@ total sweep angle = 150° ... 2.62 radians
 #define SERVO_B_CHANNEL_NUM 6
 #define SERVO_C_CHANNEL_NUM 7
 
-#define SERVO_A_PIN 		GPIO_NUM_12
-#define SERVO_B_PIN 		GPIO_NUM_27
-#define SERVO_C_PIN 		GPIO_NUM_14
+#ifdef CPU_MAP_WORKSHOP_PCB
+	#define SERVO_A_PIN 		GPIO_NUM_12
+	#define SERVO_B_PIN 		GPIO_NUM_27
+	#define SERVO_C_PIN 		GPIO_NUM_14
+#endif
+
+#ifdef CPU_MAP_SIMPLE_PCB
+	#define SERVO_A_PIN 		GPIO_NUM_16
+	#define SERVO_B_PIN 		GPIO_NUM_5
+	#define SERVO_C_PIN 		GPIO_NUM_19
+#endif
 
 #define SERVO_PULSE_FREQ 50 // 50Hz ... this is a standard analog servo value
 #define SERVO_PULSE_RES_BITS 16 // bits of resolution of PWM (16 is max)
@@ -101,6 +109,9 @@ total sweep angle = 150° ... 2.62 radians
 #define BADGE_STARTUP_LINE "G0X58.3Y38.2Z0.0" // used to locate arms for assembly alignment
 
 #define BADGE_MODE     (bit_istrue(settings.flags, BITFLAG_INVERT_PROBE_PIN))
+
+#ifndef servo_h
+#define servo_h
 
 static TaskHandle_t servoSyncTaskHandle = 0;
 

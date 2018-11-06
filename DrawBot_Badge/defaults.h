@@ -30,8 +30,8 @@
 
 #ifndef defaults_h
 
+#ifdef DEFAULTS_GENERIC	
 
-#ifdef DEFAULTS_GENERIC
   // Grbl generic default settings. Should work across different machines.
   #define DEFAULT_STEP_PULSE_MICROSECONDS 3 
   #define DEFAULT_STEPPER_IDLE_LOCK_TIME 255 // msec (0-254, 255 keeps steppers enabled)
@@ -78,12 +78,7 @@
   #define DEFAULT_X_MAX_TRAVEL 100.0 // mm NOTE: Must be a positive value.
   #define DEFAULT_Y_MAX_TRAVEL 100.0 // mm NOTE: Must be a positive value.
   #define DEFAULT_Z_MAX_TRAVEL 100.0 // mm NOTE: Must be a positive value.
-	
-	
-  
 
 #endif
-
-
 
 #endif

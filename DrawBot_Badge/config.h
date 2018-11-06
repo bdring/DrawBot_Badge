@@ -5,7 +5,7 @@
   Copyright (c) 2012-2016 Sungeun K. Jeon for Gnea Research LLC
   Copyright (c) 2009-2011 Simen Svale Skogsrud
 	
-	2018 -	Bart Dring This file was modifed for use on the ESP32
+	2018 -	Bart Dring This file was modified for use on the ESP32
 					CPU. Do not use this with Grbl for atMega328P
 
   Grbl is free software: you can redistribute it and/or modify
@@ -42,6 +42,12 @@ Some features should not be changed. See notes below.
 //#define ESP_DEBUG
 
 // Define CPU pin map and default settings.
+// select which PCB i/o mapping to use (ONLY ONE should be uncommented)
+#define CPU_MAP_WORKSHOP_PCB // this is the badgebot from the hackaday workshop
+//#define CPU_MAP_SIMPLE_PCB // see ... https://github.com/bdring/DrawBot_Badge/wiki/Simple-PCB-Version
+
+
+
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
 // one configuration file by placing their specific defaults and pin map at the bottom of this file.
 // If doing so, simply comment out these two defines and see instructions below.
@@ -69,8 +75,6 @@ Some features should not be changed. See notes below.
 
 #define ENABLE_CAPTIVE_PORTAL
 #define ENABLE_AUTHENTICATION
-
-
 
 // Define realtime command special characters. These characters are 'picked-off' directly from the
 // serial read data stream and are not passed to the grbl line execution parser. Select characters
