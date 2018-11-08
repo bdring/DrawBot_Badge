@@ -533,7 +533,7 @@ void report_build_info(char *line, uint8_t client)
 		char bt_info[LINE_BUFFER_SIZE];
 		settings_read_build_info(bt_info);
 		if (bt_info[0] == 0) {
-			grbl_send(client, "[MSG:Bluetooth:(Needs Name)");
+			grbl_send(client, "[MSG:Bluetooth:(Needs Name)]");
 		}
 		else {			
 			grbl_sendf(client, "[MSG:Bluetooth:%s]\r\n",  bt_info);
