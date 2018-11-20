@@ -33,37 +33,17 @@ volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bit
   volatile uint8_t sys_rt_exec_debug;
 #endif
 
-
-
 void setup() {
   
   serial_init();   // Setup serial baud rate and interrupts
-  settings_init(); // Load Grbl settings from EEPROM
-
-  
+  settings_init(); // Load Grbl settings from EEPROM  
   
   stepper_init();  // Configure stepper pins and interrupt timers
-	servo_init(); // for badge
-	
-  system_ini();   // Configure pinout pins and pin-change interrupt (Renamed due to conflict with esp32 files)
-	
-	 
-	#ifdef ENABLE_BLUETOOTH
-	// if $I has some text, that is the bluetooth name
-	// This is a temporary convenience until a new setting is defined
-	char line[LINE_BUFFER_SIZE];
-	settings_read_build_info(line);
-	if (line[0] != '\0') {
-		// just send to serial because it is the only interface available
-		Serial.printf("Starting Bluetooth:%s", line); 
-		bluetooth_init(line);	
-	}
-	#endif
-
-  
+  system_ini();   // Configure pinout pins and pin-change interrupt (Renamed due to conflict with esp32 files)	
 
   memset(sys_position,0,sizeof(sys_position)); // Clear machine position.
-
+	
+	servo_init(); // DrawBot_Badge
   
   // Initialize system state.
   #ifdef FORCE_INITIALIZATION_ALARM
@@ -86,6 +66,10 @@ void setup() {
 #ifdef ENABLE_WIFI
     wifi_config.begin();
 #endif
+#ifdef ENABLE_BLUETOOTH
+    bt_config.begin();
+#endif
+
 }
 
 void loop() {  

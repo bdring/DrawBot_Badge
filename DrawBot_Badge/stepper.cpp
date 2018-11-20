@@ -205,7 +205,7 @@ void IRAM_ATTR onStepperDriverTimer(void *para)  // ISR It is time to take a ste
 {
 	uint64_t step_pulse_off_time;
 	
-	const int timer_idx = (int)para;  // get the timer index	
+	//const int timer_idx = (int)para;  // get the timer index	
 	
 	TIMERG0.int_clr_timers.t0 = 1;
 	
@@ -340,35 +340,32 @@ void IRAM_ATTR onStepperDriverTimer(void *para)  // ISR It is time to take a ste
 void stepper_init()
 {	
   	
-	if (!BADGE_MODE) { // for badge project
-		
-		// make the direction pins outputs
-		#ifdef X_DIRECTION_PIN
-			pinMode(X_DIRECTION_PIN, OUTPUT);
-		#endif
-		#ifdef Y_DIRECTION_PIN
-			pinMode(Y_DIRECTION_PIN, OUTPUT);
-		#endif
-		#ifdef Z_DIRECTION_PIN
-			pinMode(Z_DIRECTION_PIN, OUTPUT);
-		#endif
-		
-		// make the step pins outputs	
-		#ifdef  X_STEP_PIN
-			pinMode(X_STEP_PIN, OUTPUT);
-		#endif
-		#ifdef Y_STEP_PIN
-			pinMode(Y_STEP_PIN, OUTPUT);
-		#endif
-		#ifdef Z_STEP_PIN
-			pinMode(Z_STEP_PIN, OUTPUT);	
-		#endif
+	// make the direction pins outputs
+	#ifdef X_DIRECTION_PIN
+		pinMode(X_DIRECTION_PIN, OUTPUT);
+	#endif
+	#ifdef Y_DIRECTION_PIN
+		pinMode(Y_DIRECTION_PIN, OUTPUT);
+	#endif
+	#ifdef Z_DIRECTION_PIN
+		pinMode(Z_DIRECTION_PIN, OUTPUT);
+	#endif
 	
-	}
+	// make the step pins outputs	
+	#ifdef  X_STEP_PIN
+		pinMode(X_STEP_PIN, OUTPUT);
+	#endif
+	#ifdef Y_STEP_PIN
+		pinMode(Y_STEP_PIN, OUTPUT);
+	#endif
+	#ifdef Z_STEP_PIN
+		pinMode(Z_STEP_PIN, OUTPUT);	
+	#endif
 	
 	// make the stepper disable pin an output
 	#ifdef STEPPERS_DISABLE_PIN
 		pinMode(STEPPERS_DISABLE_PIN, OUTPUT);
+		set_stepper_disable(true);
 	#endif
 
  // setup stepper timer interrupt
@@ -393,7 +390,7 @@ void stepper_init()
 	timer_init(STEP_TIMER_GROUP, STEP_TIMER_INDEX, &config);
   timer_set_counter_value(STEP_TIMER_GROUP, STEP_TIMER_INDEX, 0x00000000ULL);
   timer_enable_intr(STEP_TIMER_GROUP, STEP_TIMER_INDEX);  
-  timer_isr_register(STEP_TIMER_GROUP, STEP_TIMER_INDEX, onStepperDriverTimer, 0, NULL, NULL);
+  timer_isr_register(STEP_TIMER_GROUP, STEP_TIMER_INDEX, onStepperDriverTimer, NULL, 0, NULL);
 
  
 }
@@ -461,10 +458,6 @@ void st_reset()
 
 void set_direction_pins_on(uint8_t onMask)
 {  
-		if(BADGE_MODE) {
-			return;
-		}
-
 	// inverts are applied in step generation
 	#ifdef X_DIRECTION_PIN
 		digitalWrite(X_DIRECTION_PIN, (onMask & (1<<X_AXIS)));
@@ -479,10 +472,6 @@ void set_direction_pins_on(uint8_t onMask)
 
 void set_stepper_pins_on(uint8_t onMask)
 {		
-		if(BADGE_MODE) {
-			return;
-		}
-
 		onMask ^= settings.step_invert_mask; // invert pins as required by invert mask
 		
 		#ifdef X_STEP_PIN
@@ -510,7 +499,7 @@ void st_go_idle()
 		
 		
     // Force stepper dwell to lock axes for a defined amount of time to ensure the axes come to a complete
-    // stop and not drift from residual inertial forces at the end of the last movement.  				
+    // stop and not drift from residual inertial forces at the end of the last movement.  		
 		
 		stepper_idle = true; // esp32 work around for disable in main loop
 		stepper_idle_counter = esp_timer_get_time() + (settings.stepper_idle_lock_time * 1000); // * 1000 because the time is in uSecs		

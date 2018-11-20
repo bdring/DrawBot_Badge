@@ -33,9 +33,10 @@
 
 // Define the Grbl system include files. NOTE: Do not alter organization.
 #include "config.h"
+#include "nuts_bolts.h"
 #include "cpu_map.h"
 #include "tdef.h"
-#include "nuts_bolts.h"
+
 #include "defaults.h"
 #include "settings.h"
 #include "system.h"
@@ -54,10 +55,10 @@
 #include "spindle_control.h"
 #include "stepper.h"
 #include "jog.h"
-#include "servo.h" // for badge
+#include "servo.h" // DrawBot_Badge
 
 #ifdef ENABLE_BLUETOOTH
-	#include "grbl_bluetooth.h"
+	#include "BTconfig.h"
 #endif
 
 #ifdef ENABLE_SD_CARD	
@@ -68,5 +69,8 @@
     #include "wificonfig.h"
     #ifdef ENABLE_HTTP
     #include "serial2socket.h"
+    #endif
+    #ifdef ENABLE_TELNET
+    #include "telnet_server.h"
     #endif
 #endif

@@ -30,7 +30,7 @@
 
 #ifndef defaults_h
 
-#ifdef DEFAULTS_GENERIC	
+#ifdef DEFAULTS_DRAWBOT_BADGE	
 
   // Grbl generic default settings. Should work across different machines.
   #define DEFAULT_STEP_PULSE_MICROSECONDS 3 

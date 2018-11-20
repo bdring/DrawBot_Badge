@@ -21,8 +21,6 @@
 #ifndef nuts_bolts_h
 #define nuts_bolts_h
 
-
-
 #define false 0
 #define true 1
 
@@ -34,6 +32,13 @@
 #define Y_AXIS 1
 #define Z_AXIS 2
 // #define A_AXIS 3
+
+// CoreXY motor assignments. DO NOT ALTER.
+// NOTE: If the A and B motor axis bindings are changed, this effects the CoreXY equations.
+#define A_MOTOR X_AXIS // Must be X_AXIS
+#define B_MOTOR Y_AXIS // Must be Y_AXIS
+
+
 
 // Conversions
 #define MM_PER_INCH (25.40)
@@ -52,7 +57,8 @@
 #define isequal_position_vector(a,b) !(memcmp(a, b, sizeof(float)*N_AXIS))
 
 // Bit field and masking macros
-#define bit(n) (1 << n)
+//Arduino.h:104:0: note: this is the location of the previous definition
+//#define bit(n) (1 << n)
 #define bit_true(x,mask) (x) |= (mask)
 #define bit_false(x,mask) (x) &= ~(mask)
 #define bit_istrue(x,mask) ((x & mask) != 0)
@@ -77,8 +83,9 @@ float limit_value_by_axis_maximum(float *max_value, float *unit_vec);
 
 //int constrain(int val, int min, int max);
 //long map(long x, long in_min, long in_max, long out_min, long out_max);
-float mapConstrain(float x, float in_min, float in_max, float out_min, float out_max);
-float map_float(float x, float in_min, float in_max, float out_min, float out_max);
-float constrain_float(float in, float min, float max);
+float mapConstrain(float x, float in_min, float in_max, float out_min, float out_max); // DrawBot_Badge
+
+float map_float(float x, float in_min, float in_max, float out_min, float out_max); // DrawBot_Badge
+float constrain_float(float in, float min, float max);  // DrawBot_Badge
 
 #endif

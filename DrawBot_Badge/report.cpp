@@ -50,7 +50,7 @@
 
 
 // this is a generic send function that everything should use, so interfaces could be added (Bluetooth, etc)
-void grbl_send(uint8_t client, char *text)
+void grbl_send(uint8_t client, const char *text)
 {	
 #ifdef ENABLE_BLUETOOTH
     if (SerialBT.hasClient() && ( client == CLIENT_BT || client == CLIENT_ALL ) )
@@ -64,6 +64,12 @@ void grbl_send(uint8_t client, char *text)
 #if defined (ENABLE_WIFI) && defined(ENABLE_HTTP) && defined(ENABLE_SERIAL2SOCKET_OUT)
 		if ( client == CLIENT_WEBUI || client == CLIENT_ALL )
 			Serial2Socket.write((const uint8_t*)text, strlen(text));
+#endif
+
+#if defined (ENABLE_WIFI) && defined(ENABLE_TELNET)
+		if ( client == CLIENT_TELNET || client == CLIENT_ALL ){
+                telnet_server.write((const uint8_t*)text, strlen(text));
+            }
 #endif
 	
 	if ( client == CLIENT_SERIAL || client == CLIENT_ALL )
@@ -234,7 +240,6 @@ void report_grbl_settings(uint8_t client) {
 	sprintf(setting, "$4=%d\r\n", bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE));  strcat(rpt, setting);
 	sprintf(setting, "$5=%d\r\n", bit_istrue(settings.flags,BITFLAG_INVERT_LIMIT_PINS));  strcat(rpt, setting);
 	sprintf(setting, "$6=%d\r\n", bit_istrue(settings.flags,BITFLAG_INVERT_PROBE_PIN));  strcat(rpt, setting);
-	//sprintf(setting, "$9=%d\r\n", settings.badge_mode);   strcat(rpt, setting);  // for badge
 	sprintf(setting, "$10=%d\r\n", settings.status_report_mask);  strcat(rpt, setting);
 	
 	sprintf(setting, "$11=%4.3f\r\n", settings.junction_deviation);   strcat(rpt, setting);	
@@ -261,8 +266,6 @@ void report_grbl_settings(uint8_t client) {
     strcat(rpt, "$32=0\r\n");
   #endif
 	
-	
-	
   // Print axis settings
   uint8_t idx, set_idx;
   uint8_t val = AXIS_SETTINGS_START_VAL;
@@ -277,8 +280,6 @@ void report_grbl_settings(uint8_t client) {
     }
     val += AXIS_SETTINGS_INCREMENT;
   }
-	
-	
 	
 	grbl_send(client,rpt);
 }
@@ -454,7 +455,7 @@ void report_startup_line(uint8_t n, char *line, uint8_t client)
 void report_execute_startup_message(char *line, uint8_t status_code, uint8_t client)
 {	
 	grbl_sendf(client, ">%s:", line);  	// OK to send to all
-  report_status_message(status_code, client);
+  report_status_message(status_code, client); 
 }
 	
 // Prints build info line
@@ -528,19 +529,9 @@ void report_build_info(char *line, uint8_t client)
   #if defined (ENABLE_WIFI)
   grbl_send(client, (char *)wifi_config.info()); 
   #endif
-	
-	#ifdef ENABLE_BLUETOOTH
-		char bt_info[LINE_BUFFER_SIZE];
-		settings_read_build_info(bt_info);
-		if (bt_info[0] == 0) {
-			grbl_send(client, "[MSG:Bluetooth:(Needs Name)]");
-		}
-		else {			
-			grbl_sendf(client, "[MSG:Bluetooth:%s]\r\n",  bt_info);
-		}
-		
-	#endif
-	
+   #if defined (ENABLE_BLUETOOTH)
+  grbl_send(client, (char *)bt_config.info()); 
+  #endif
 }
 
 
@@ -653,11 +644,11 @@ void report_realtime_status(uint8_t client)
   // Report realtime feed speed
   #ifdef REPORT_FIELD_CURRENT_FEED_SPEED
     #ifdef VARIABLE_SPINDLE      
-			sprintf(temp, "|FS:%4.3f,%4.3f", st_get_realtime_rate(), sys.spindle_speed);
+			sprintf(temp, "|FS:%.0f,%.0f", st_get_realtime_rate(), sys.spindle_speed);
 			strcat(status, temp);
     #else
       
-			sprintf(temp, "|F:%4.3f", st_get_realtime_rate());
+			sprintf(temp, "|F:%.0f", st_get_realtime_rate());
 			strcat(status, temp);
     #endif      
   #endif

@@ -19,6 +19,7 @@
 */
 
 #include "grbl.h"
+#include "commands.h"
 
 #define RX_RING_BUFFER (RX_BUFFER_SIZE+1)
 #define TX_RING_BUFFER (TX_BUFFER_SIZE+1)
@@ -28,7 +29,7 @@ portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 uint8_t serial_rx_buffer[CLIENT_COUNT][RX_RING_BUFFER];
 uint8_t serial_rx_buffer_head[CLIENT_COUNT] = {0};
 volatile uint8_t serial_rx_buffer_tail[CLIENT_COUNT] = {0};
-
+static TaskHandle_t serialCheckTaskHandle = 0;
 
 // Returns the number of bytes available in the RX serial buffer.
 uint8_t serial_get_rx_buffer_available(uint8_t client)
@@ -43,7 +44,7 @@ uint8_t serial_get_rx_buffer_available(uint8_t client)
 void serial_init()
 {
 	Serial.begin(BAUD_RATE);	
-	
+	serialCheckTaskHandle = 0;
 	// create a task to check for incoming data
 	xTaskCreatePinnedToCore(	serialCheckTask,    // task
 													"servoSyncTask", // name for task
@@ -61,9 +62,9 @@ void serial_init()
 // REaltime stuff is acted upon, then characters are added to the appropriate buffer
 void serialCheckTask(void *pvParameters)
 {
-	uint8_t data;
+  uint8_t data = 0;
   uint8_t next_head;
-	uint8_t client; // who send the data
+	uint8_t client = CLIENT_ALL; // who send the data
 	
 	uint8_t client_idx = 0;  // index of data buffer
 	
@@ -75,6 +76,9 @@ void serialCheckTask(void *pvParameters)
 		#endif
         #if defined (ENABLE_WIFI) && defined(ENABLE_HTTP) && defined(ENABLE_SERIAL2SOCKET_IN)
 			|| Serial2Socket.available()
+		#endif
+         #if defined (ENABLE_WIFI) && defined(ENABLE_TELNET)
+			|| telnet_server.available()
 		#endif
             )
 		{			
@@ -93,8 +97,21 @@ void serialCheckTask(void *pvParameters)
                 } else {		
 				#endif
                 #if defined (ENABLE_WIFI) && defined(ENABLE_HTTP)  && defined(ENABLE_SERIAL2SOCKET_IN)
-		client = CLIENT_WEBUI;
-                data = Serial2Socket.read();
+                if (Serial2Socket.available()) {
+                    client = CLIENT_WEBUI;
+                    data = Serial2Socket.read();
+                    }
+                    else
+                        {
+                #endif
+                #if defined (ENABLE_WIFI) && defined(ENABLE_TELNET)
+                    if(telnet_server.available()){
+                        client = CLIENT_TELNET;
+                        data = telnet_server.read();
+                    }
+                #endif
+                #if defined (ENABLE_WIFI) && defined(ENABLE_HTTP)  && defined(ENABLE_SERIAL2SOCKET_IN)
+                }
                 #endif
                 #ifdef ENABLE_BLUETOOTH
                 }
@@ -164,9 +181,13 @@ void serialCheckTask(void *pvParameters)
 					}
 			}  // switch data			
 		}  // if something available
+        COMMANDS::handle();
 #ifdef ENABLE_WIFI
         wifi_config.handle();
-#endif	
+#endif
+#ifdef ENABLE_BLUETOOTH
+        bt_config.handle();
+#endif
 #if defined (ENABLE_WIFI) && defined(ENABLE_HTTP) && defined(ENABLE_SERIAL2SOCKET_IN)
         Serial2Socket.handle_flush();
 #endif

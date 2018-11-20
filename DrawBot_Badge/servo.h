@@ -28,6 +28,8 @@ max pulse = 0.220 seconds
 total sweep angle = 150° ... 2.62 radians
 */
 
+
+
 // ---- begin servo definition  ------
 #define SERVO_MIN_RADIANS  0.0
 #define SERVO_MAX_RADIANS  2.62 // 150°
@@ -36,7 +38,7 @@ total sweep angle = 150° ... 2.62 radians
 // ---- begin servo definition  ------
 
 #define SERVO_TIMER_NUM 1
-#define SERVO_TIMER_INT_FREQ 50 // Hz This is the task freq
+#define SERVO_TIMER_INT_FREQ 20 // Hz This is the task freq
 
 #define SERVO_A_CHANNEL_NUM 5
 #define SERVO_B_CHANNEL_NUM 6
@@ -49,14 +51,19 @@ total sweep angle = 150° ... 2.62 radians
 #endif
 
 #ifdef CPU_MAP_SIMPLE_PCB
-	#define SERVO_A_PIN 		GPIO_NUM_16
-	#define SERVO_B_PIN 		GPIO_NUM_5
-	#define SERVO_C_PIN 		GPIO_NUM_19
+	#define SERVO_A_PIN 		GPIO_NUM_12
+	#define SERVO_B_PIN 		GPIO_NUM_14
+	#define SERVO_C_PIN 		GPIO_NUM_27
 #endif
 
 #define SERVO_PULSE_FREQ 50 // 50Hz ... this is a standard analog servo value
 #define SERVO_PULSE_RES_BITS 16 // bits of resolution of PWM (16 is max)
 #define SERVO_PULSE_RES_COUNT 65535 // see above
+
+// these delays stagger the startup of the servos to prevent a large 
+// current surge at turn on
+#define SERVO_A_DELAY 25
+#define SERVO_B_DELAY 60
 
 #define SERVO_TIME_PER_BIT  ((1.0 / (float)SERVO_PULSE_FREQ) / ((float)SERVO_PULSE_RES_COUNT) ) // seconds
 

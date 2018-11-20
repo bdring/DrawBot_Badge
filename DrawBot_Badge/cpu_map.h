@@ -69,6 +69,9 @@
 		#define SPINDLE_PWM_BIT_PRECISION 8
 		#define SPINDLE_PWM_OFF_VALUE     0
 		#define SPINDLE_PWM_MAX_VALUE     255  // TODO ESP32 Calc from resolution
+		#ifndef SPINDLE_PWM_MIN_VALUE
+			#define SPINDLE_PWM_MIN_VALUE   1   // Must be greater than zero.
+		#endif
 		#define SPINDLE_PWM_RANGE         (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)		
 		
 		// if these spindle function pins are defined, they will be activated in the code
@@ -102,6 +105,8 @@
 	
 	// This is the CPU Map for the Simple Badgebot controller ... most of the I/O is not needed	
 	
+	// servo pins are defined in servo.h
+	
 	  // It is OK to comment out any step and direction pins. This
     // won't affect operation except that there will be no output
 		// form the pins. Grbl will virtually move the axis. This could 
@@ -122,6 +127,7 @@
 		//#define COOLANT_FLOOD_PIN 	GPIO_NUM_16	
 		//#define COOLANT_MIST_PIN   	GPIO_NUM_21
 		
+		
 		// If SPINDLE_PWM_PIN is commented out, this frees up the pin, but Grbl will still
 		// use a virtual spindle. Do not comment out the other parameters for the spindle.
 		//#define SPINDLE_PWM_PIN    GPIO_NUM_17 
@@ -130,6 +136,9 @@
 		#define SPINDLE_PWM_BIT_PRECISION 8
 		#define SPINDLE_PWM_OFF_VALUE     0
 		#define SPINDLE_PWM_MAX_VALUE     255  // TODO ESP32 Calc from resolution
+		#ifndef SPINDLE_PWM_MIN_VALUE
+			#define SPINDLE_PWM_MIN_VALUE   1   // Must be greater than zero.
+		#endif
 		#define SPINDLE_PWM_RANGE         (SPINDLE_PWM_MAX_VALUE-SPINDLE_PWM_MIN_VALUE)		
 		
 		// if these spindle function pins are defined, they will be activated in the code
@@ -141,12 +150,12 @@
 		//#define Y_LIMIT_PIN      	GPIO_NUM_4  
 		//#define Z_LIMIT_PIN     	GPIO_NUM_15 		
 		
-		#define PROBE_PIN       	GPIO_NUM_32  
+		//#define PROBE_PIN       	GPIO_NUM_32  
 		
-		#define CONTROL_SAFETY_DOOR_PIN   GPIO_NUM_35  // needs external pullup
-		#define CONTROL_RESET_PIN         GPIO_NUM_34  // needs external pullup
-		#define CONTROL_FEED_HOLD_PIN     GPIO_NUM_36  // needs external pullup 
-		#define CONTROL_CYCLE_START_PIN   GPIO_NUM_39  // needs external pullup    		
+		//#define CONTROL_SAFETY_DOOR_PIN   GPIO_NUM_35  // needs external pullup
+		//#define CONTROL_RESET_PIN         GPIO_NUM_34  // needs external pullup
+		//#define CONTROL_FEED_HOLD_PIN     GPIO_NUM_36  // needs external pullup 
+		//#define CONTROL_CYCLE_START_PIN   GPIO_NUM_39  // needs external pullup    		
 		
 		// These are some ESP32 CPU Settings that the program needs, but are generally not changed
 		#define F_TIMERS	80000000    // a reference to the speed of ESP32 timers

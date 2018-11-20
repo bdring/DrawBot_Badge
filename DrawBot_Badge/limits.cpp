@@ -33,7 +33,7 @@
   #define HOMING_AXIS_LOCATE_SCALAR  5.0 // Must be > 1 to ensure limit switch is cleared.
 #endif
 
-void isr_limit_switches()
+void IRAM_ATTR isr_limit_switches()
 {
 	 // Ignore limit switches if already in an alarm state or in-process of executing an alarm.
     // When in the alarm state, Grbl should have been reset or will force a reset, so any pending
@@ -338,15 +338,11 @@ uint8_t limits_get_state()
 	#ifdef INVERT_LIMIT_PIN_MASK // not normally used..unless you have both normal and inverted switches
     pin ^= INVERT_LIMIT_PIN_MASK;
   #endif	
-	
-	//grbl_sendf(CLIENT_SERIAL, "Pin:%d\r\n", pin);
   
   if (bit_istrue(settings.flags,BITFLAG_INVERT_LIMIT_PINS)) 
 	{ 
 		pin ^= LIMIT_MASK;
 	}
-	
-	//grbl_sendf(CLIENT_SERIAL, "Pin:%d\r\n", pin);
   
   if (pin) {
     uint8_t idx;
@@ -354,8 +350,6 @@ uint8_t limits_get_state()
       if (pin & get_limit_pin_mask(idx)) { limit_state |= (1 << idx); }
     }
   }
-	
-	//grbl_sendf(CLIENT_SERIAL, "limit_state:%d\r\n", limit_state);
 	
   return(limit_state);
   

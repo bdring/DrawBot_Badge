@@ -48,13 +48,15 @@ void settings_init()
 }
 
 // Method to restore EEPROM-saved Grbl global settings back to defaults.
-void settings_restore(uint8_t restore_flag) {		
-	if (restore_flag & SETTINGS_RESTORE_ALL){
-		#ifdef ENABLE_WIFI
-      wifi_config.reset_ESP();
-		#endif
-  }	
-	
+void settings_restore(uint8_t restore_flag) {
+  if (restore_flag & SETTINGS_RESTORE_ALL){
+#ifdef ENABLE_WIFI
+      wifi_config.reset_settings();
+#endif
+#ifdef ENABLE_BLUETOOTH
+      bt_config.reset_settings();
+#endif
+  }
   if (restore_flag & SETTINGS_RESTORE_DEFAULTS) {
     settings.pulse_microseconds = DEFAULT_STEP_PULSE_MICROSECONDS;
     settings.stepper_idle_lock_time = DEFAULT_STEPPER_IDLE_LOCK_TIME;
@@ -95,7 +97,7 @@ void settings_restore(uint8_t restore_flag) {
     settings.acceleration[Z_AXIS] = DEFAULT_Z_ACCELERATION;
     settings.max_travel[X_AXIS] = (-DEFAULT_X_MAX_TRAVEL);
     settings.max_travel[Y_AXIS] = (-DEFAULT_Y_MAX_TRAVEL);
-    settings.max_travel[Z_AXIS] = (-DEFAULT_Z_MAX_TRAVEL);		
+    settings.max_travel[Z_AXIS] = (-DEFAULT_Z_MAX_TRAVEL);
 
     write_global_settings();
   }
@@ -129,7 +131,7 @@ void settings_restore(uint8_t restore_flag) {
   
 }
 
-// Reads Grbl global settings struct from EEPROM. Return false if reading fails
+// Reads Grbl global settings struct from EEPROM.
 uint8_t read_global_settings() {
   // Check version-byte of eeprom
   uint8_t version = EEPROM.read(0);
@@ -141,13 +143,6 @@ uint8_t read_global_settings() {
   } else {
     return(false);
   }
-	
-	// for badge
-	// check to see that calibration values are reasonable,
-	if (BADGE_MODE){		
-		return validate_bagde_settings();		
-	}
-	
   return(true);
 }
 
@@ -234,13 +229,7 @@ uint8_t settings_store_global_setting(uint8_t parameter, float value) {
             #ifdef MAX_STEP_RATE_HZ
               if (value*settings.max_rate[parameter] > (MAX_STEP_RATE_HZ*60.0)) { return(STATUS_MAX_STEP_RATE_EXCEEDED); }
             #endif
-						if (BADGE_MODE) { // for badge
-							settings.steps_per_mm[parameter] = servo_constrain_cal_range(value);
-						}
-						else {
-							settings.steps_per_mm[parameter] = value;
-						}
-            
+            settings.steps_per_mm[parameter] = value;
             break;
           case 1:
             #ifdef MAX_STEP_RATE_HZ
@@ -249,15 +238,7 @@ uint8_t settings_store_global_setting(uint8_t parameter, float value) {
             settings.max_rate[parameter] = value;
             break;
           case 2: settings.acceleration[parameter] = value*60*60; break; // Convert to mm/min^2 for grbl internal use.
-          case 3: 
-						if (BADGE_MODE) { // for badge
-							settings.max_travel[parameter] = -servo_constrain_cal_range(value);
-						}
-						else {
-							settings.max_travel[parameter] = -value; 
-						}
-						
-						break;  // Store as negative for grbl internal use.
+          case 3: settings.max_travel[parameter] = -value; break;  // Store as negative for grbl internal use.
         }
         break; // Exit while-loop after setting has been configured and proceed to the EEPROM write call.
       } else {
@@ -337,19 +318,11 @@ uint8_t settings_store_global_setting(uint8_t parameter, float value) {
           return(STATUS_SETTING_DISABLED_LASER);
         #endif
         break;
-				
       default:
         return(STATUS_INVALID_STATEMENT);
     }
   }
   write_global_settings();
-	
-	if (parameter == 9) {
-		grbl_send(CLIENT_ALL, "Restarting...\r\n");
-		delay(2000);
-		ESP.restart();
-	}
-	
   return(STATUS_OK);
 }
 

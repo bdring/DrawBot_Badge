@@ -36,6 +36,9 @@
 
 #include "grbl.h"
 
+// used to stagger turn on
+bool servo_a_enable = false; 
+bool servo_b_enable = false;
 
 void servo_init()
 {
@@ -62,6 +65,9 @@ void servo_init()
 	grbl_sendf(CLIENT_SERIAL, "[MSG:Servo B zero: %d]\r\n", SERVO_B_ZERO_PT);	
 	*/
 	
+	servo_a_enable = false;
+	servo_b_enable = false;
+	
 	
 	//Servo A ledcSetup
 	ledcSetup(SERVO_A_CHANNEL_NUM, SERVO_PULSE_FREQ, SERVO_PULSE_RES_BITS);
@@ -74,6 +80,8 @@ void servo_init()
 	//Servo C ledcSetup
 	ledcSetup(SERVO_C_CHANNEL_NUM, SERVO_PULSE_FREQ, SERVO_PULSE_RES_BITS);
 	ledcAttachPin(SERVO_C_PIN, SERVO_C_CHANNEL_NUM);
+
+  badge_servos_disable();
 	
 	// setup a task that will calculate the kinematics and set the PWM	
 	
@@ -128,19 +136,28 @@ void servoSyncTask(void *pvParameters)
 	float m_pos[N_AXIS];
 	TickType_t xLastWakeTime;
 	const TickType_t xServoFrequency = SERVO_TIMER_INT_FREQ;  // in ticks (ms)
+	uint16_t servo_delay_counter = 0;
 	
 	while(true) {		
 	    
 			vTaskDelayUntil(&xLastWakeTime, xServoFrequency);
 			
-			if(!stepper_idle) //sys.state == STATE_CYCLE) {				
-				{
+			if (!servo_b_enable) { // B takes longer so check that one
+				servo_delay_counter++;				
+				servo_a_enable = (servo_delay_counter > SERVO_A_DELAY);
+				servo_b_enable = (servo_delay_counter > SERVO_B_DELAY); 				
+			}
+			
+			if(!stepper_idle) {				
 				memcpy(current_position,sys_position,sizeof(sys_position));  // get current position in step	
 				system_convert_array_steps_to_mpos(m_pos,current_position); // convert to millimeters
 			
 				calc_servo_intersect(m_pos[X_AXIS], m_pos[Y_AXIS], m_pos[Z_AXIS]); // calculate kinematics and move the servos			
 			}
-	}	
+			 else {
+				badge_servos_disable();
+			 }
+    }
 }
 
 
@@ -195,7 +212,6 @@ void calc_servo_cosines(float penX, float penY)
 // intersection of circles method
 void calc_servo_intersect(float penX, float penY, float penZ)
 {
-	
 	
 	float angle_servo_a, angle_servo_b, angle_servo_c; // the angle of servo A arm relative to machine		
 	float intsecX0, intsecY0, intsecX1, intsecY1;  // two possible intersection points 	
@@ -306,8 +322,11 @@ void calc_servo_intersect(float penX, float penY, float penZ)
 	// ledcWrite appears to have issues with interrupts, so make this a critical section
 	portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 	taskENTER_CRITICAL(&myMutex);	
-		ledcWrite(SERVO_A_CHANNEL_NUM, servo_a_pulse_len);
-		ledcWrite(SERVO_B_CHANNEL_NUM, servo_b_pulse_len);		
+		if (servo_a_enable)
+			ledcWrite(SERVO_A_CHANNEL_NUM, servo_a_pulse_len);
+		
+		if (servo_b_enable)			
+			ledcWrite(SERVO_B_CHANNEL_NUM, servo_b_pulse_len);		
 		ledcWrite(SERVO_C_CHANNEL_NUM, servo_c_pulse_len);  
 	taskEXIT_CRITICAL(&myMutex);
 	

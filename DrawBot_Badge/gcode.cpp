@@ -163,7 +163,10 @@ uint8_t gc_execute_line(char *line, uint8_t client)
               mantissa = 0; // Set to zero to indicate valid non-integer G command.
             }                
             break;
-          case 0: case 1: case 2: case 3: case 38:
+          case 0: case 1: case 2: case 3:
+#ifdef PROBE_PIN //only allow G38 "Probe" commands if a probe pin is defined.
+	  case 38: 
+#endif			
             // Check for G0/1/2/3/38 being called with G10/28/30/92 on same block.
             // * G43.1 is also an axis command but is not explicitly defined this way.
             if (axis_command) { FAIL(STATUS_GCODE_AXIS_COMMAND_CONFLICT); } // [Axis word/command conflict]
@@ -859,7 +862,7 @@ uint8_t gc_execute_line(char *line, uint8_t client)
   if (gc_parser_flags & GC_PARSER_JOG_MOTION) {
     // Only distance and unit modal commands and G53 absolute override command are allowed.
     // NOTE: Feed rate word and axis word checks have already been performed in STEP 3.
-    if (command_words & ~(bit(MODAL_GROUP_G3) | bit(MODAL_GROUP_G6 | bit(MODAL_GROUP_G0))) ) { FAIL(STATUS_INVALID_JOG_COMMAND) };
+    if (command_words & ~(bit(MODAL_GROUP_G3) | bit(MODAL_GROUP_G6) | bit(MODAL_GROUP_G0)) ) { FAIL(STATUS_INVALID_JOG_COMMAND) };
     if (!(gc_block.non_modal_command == NON_MODAL_ABSOLUTE_OVERRIDE || gc_block.non_modal_command == NON_MODAL_NO_ACTION)) { FAIL(STATUS_INVALID_JOG_COMMAND); }
 
     // Initialize planner data to current spindle and coolant modal state.
